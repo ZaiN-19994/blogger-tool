@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>نشر تدوينة تلقائيًا</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: Arial;
+      padding: 20px;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      background: #0af;
+      color: white;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <h2>🔹🪄 نشر تدوينة جديدة على بلوجر</h2>
+
+  <button onclick="login()">🔐 تسجيل الدخول بحساب جوجل</button>
+
+  <div id="form" class="hidden">
+    <input type="text" id="title" placeholder="عنوان التدوينة">
+    <input type="text" id="poster" placeholder="رابط البوستر">
+    <input type="text" id="video" placeholder="رابط الفيديو">
+    <button onclick="publishPost()">🚀 نشر التدوينة</button>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    const CLIENT_ID = "632431284451-224h8lmaql1disr9uk8kjcbv1l0moda7.apps.googleusercontent.com";
+    const REDIRECT_URI = "https://zain-19994.github.io/blogger-tool/oauth2callback.html";
+    const BLOG_ID = "5055056580470574725";
+    let accessToken = "";
+
+    function login() {
+      const scope = "https://www.googleapis.com/auth/blogger";
+      const url = `https://accounts.google.com/o/oauth2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${scope}&response_type=token`;
+      window.location.href = url;
+    }
+
+    // استخراج التوكن من الرابط بعد تسجيل الدخول
+    window.onload = () => {
+      if (window.location.hash.includes("access_token")) {
+        accessToken = new URLSearchParams(window.location.hash.substring(1)).get("access_token");
+        document.getElementById("form").classList.remove("hidden");
+      }
+    };
+
+    function publishPost() {
+      const title = document.getElementById("title").value;
+      const poster = document.getElementById("poster").value;
+      const video = document.getElementById("video").value;
+
+      const fullTitle = `🔹🪄🔹|| ${title}`;
+      const htmlContent = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.jwplayer.com/libraries/IDzF9Zmk.js"></script>
+  <style>
+    body { margin: 0; background-color: #000; }
+    #vplayer { width: 100vw; height: 100vh; position: relative; z-index: 2; }
+    .poster { position: absolute; width: 100vw; height: 100vh; object-fit: cover; z-index: 1; }
+    .video_ad, .video_ad_fadein {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      color: #000;
+      z-index: 999;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <img class="poster" src="${poster}" alt="بوستر الفيلم">
+  <div id="vplayer"></div>
+  <div class="video_ad">إعلان بعد انتهاء الفيديو</div>
+  <div class="video_ad_fadein">إعلان في بداية الفيديو</div>
+  <div id="fviews" style="color: white; padding: 10px;"></div>
+  <script type="text/javascript">
+    var playerSetupOptions = {
+      sources: [{file:"${video}", label:"360p"}],
+      image: "${poster}",
+      width: "100%",
+      height: "100%",
+      stretching: "exactfit",
+      duration: "1814400",
+      live: true,
+      preload: 'auto',
+      androidhls: true,
+      hlshtml: true,
+      primary: "html5",
+      startparam: "start",
+      tracks: [],
+      sharing: {code: "", link: "", sites: []},
+      abouttext: "", 
+      aboutlink: "https://v.aflam.news",
+      cast: {},
+      playbackRateControls: true,
+      playbackRates: [0.5, 1, 2, 3]
+    };
+    jwplayer("vplayer").setup(playerSetupOptions);
+    var vvplay, vvad, x2ok = 0;
+    var player = jwplayer();
+    player.on('time', function(x) {
+      if (x.position >= 5 && vvad != 1) {
+        vvad = 1;
+        $('div.video_ad_fadein').fadeIn('slow');
+      }
+      if (x2ok == 0 && x.position >= 2763 && x.position <= (2763 + 2)) {
+        x2ok = x.position;
+      }
+    });
+    player.on('play', function(x) { doPlay(x); });
+    player.on('complete', function() { $('div.video_ad').show(); });
+    function doPlay(x) {
+      $('div.video_ad').hide();
+      if (vvplay) return;
+      vvplay = 1;
+      let adb = window.cRAds === undefined ? 1 : 0;
+      $.get('https://v.aflam.news/dl?op=view&file_code=ifdja1ecay6b&hash=916523-0-0-1745668226-46cfa084a7c2026262f701d37911d983&embed=&adb=' + adb, function(data) {
+        $('#fviews').html(data);
+      });
+    }
+  </script>
+</body>
+</html>`;
+
+      fetch(`https://www.googleapis.com/blogger/v3/blogs/${BLOG_ID}/posts/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          kind: "blogger#post",
+          title: fullTitle,
+          content: htmlContent
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("result").innerHTML = `
+          ✅ تم النشر بنجاح!<br>
+          <a href="${data.url}" target="_blank" style="color:lightgreen">${data.url}</a>
+        `;
+      })
+      .catch(err => {
+        console.error(err);
+        alert("فشل النشر");
+      });
+    }
+  </script>
+
+</body>
+</html>
