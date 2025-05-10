@@ -1,39 +1,238 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>استلام التوكن</title>
+  <title>نشر فيلم جديد</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e8f5e9;
+      border-radius: 5px;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <h2>جارٍ تسجيل الدخول...</h2>
+  <h1>نشر فيلم جديد</h1>
+  
+  <div id="authForm" style="display: none;">
+    <div class="form-group">
+      <label for="movieTitle">عنوان الفيلم/المسلسل:</label>
+      <input type="text" id="movieTitle" placeholder="مثال: فيلم The Match - 2025">
+    </div>
+    
+    <div class="form-group">
+      <label for="posterUrl">رابط صورة البوستر:</label>
+      <input type="text" id="posterUrl" placeholder="https://example.com/poster.jpg">
+    </div>
+    
+    <div class="form-group">
+      <label for="videoUrl">رابط الفيديو:</label>
+      <input type="text" id="videoUrl" placeholder="https://example.com/video.m3u8">
+    </div>
+    
+    <button onclick="createPost()">نشر الفيلم</button>
+  </div>
+  
+  <div id="result"></div>
 
   <script>
     // استخراج التوكن من الرابط
     const hashParams = new URLSearchParams(window.location.hash.substr(1));
     const accessToken = hashParams.get('access_token');
-
+    
     if (accessToken) {
-      // مثلًا نعمل بوست جديد
+      document.getElementById('authForm').style.display = 'block';
+    } else {
+      document.getElementById('result').innerHTML = '<p style="color:red;">حدث خطأ في المصادقة، يرجى المحاولة مرة أخرى</p>';
+    }
+    
+    function createPost() {
+      const title = document.getElementById('movieTitle').value;
+      const poster = document.getElementById('posterUrl').value;
+      const video = document.getElementById('videoUrl').value;
+      
+      if (!title || !poster || !video) {
+        alert('الرجاء إدخال جميع الحقول المطلوبة');
+        return;
+      }
+      
+      // إنشاء محتوى HTML ثابت مع المتغيرات الثلاثة
+      const htmlContent = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+  <script src="https://cdn.jwplayer.com/libraries/IDzF9Zmk.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+    }
+    #vplayer {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      z-index: 2;
+    }
+    .poster {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1;
+    }
+    .video_ad, .video_ad_fadein {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      color: #000;
+      z-index: 999;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+  <img class="poster" src="${poster}" alt="بوستر الفيلم">
+  <div id="vplayer"></div>
+  <div class="video_ad">إعلان بعد انتهاء الفيديو</div>
+  <div class="video_ad_fadein">إعلان في بداية الفيديو</div>
+  <div id="fviews" style="color: white; padding: 10px;"></div>
+
+  <script type="text/javascript">
+  var playerSetupOptions = {
+    sources: [
+      {file:"${video}", label:"360p" },
+      {file:"", label:"333p" }
+    ],
+    image: "${poster}",
+    width: "100%", 
+    height: "100%",
+    stretching: "exactfit",
+    duration: "1814400",
+    live: true,
+    preload: 'auto',
+    androidhls: true,
+    hlshtml: true,
+    primary: "html5",
+    startparam: "start",
+    tracks: [],
+    sharing: {
+      code: "%3CIFRAME SRC%3D%22https%3A%2F%2Fv.aflam.news%2Fembed-ifdja1ecay6b.html%22 FRAMEBORDER%3D0 MARGINWIDTH%3D0 MARGINHEIGHT%3D0 SCROLLING%3DNO WIDTH%3D640 HEIGHT%3D360 allowfullscreen%3E%3C%2FIFRAME%3E",
+      link: "https://v.aflam.news/ifdja1ecay6b.html", 
+      sites: []
+    },
+    abouttext: "", 
+    aboutlink: "https://v.aflam.news",
+    cast: {},
+    playbackRateControls: true, 
+    playbackRates: [0.5, 1, 2, 3]
+  };
+
+  jwplayer("vplayer").setup(playerSetupOptions);
+
+  var vvplay, vvad, x2ok = 0;
+  var player = jwplayer();
+
+  player.on('time', function(x) { 
+    if (x.position >= 5 && vvad != 1) {
+      vvad = 1;
+      $('div.video_ad_fadein').fadeIn('slow');
+    }
+    if (x2ok == 0 && x.position >= 2763 && x.position <= (2763 + 2)) {
+      x2ok = x.position;
+    }
+  });
+
+  player.on('play', function(x) { doPlay(x); });
+
+  player.on('complete', function() { 
+    $('div.video_ad').show();  
+  });
+
+  function doPlay(x) {
+    $('div.video_ad').hide();
+    if (vvplay) return;
+    vvplay = 1;
+    let adb = window.cRAds === undefined ? 1 : 0;
+    $.get('https://v.aflam.news/dl?op=view&file_code=ifdja1ecay6b&hash=916523-0-0-1745668226-46cfa084a7c2026262f701d37911d983&embed=&adb=' + adb, function(data) {
+      $('#fviews').html(data);
+    });
+  }
+</script>
+
+</body>
+</html>`;
+      
+      // إرسال طلب النشر إلى Blogger API
       fetch('https://www.googleapis.com/blogger/v3/blogs/5055056580470574725/posts/', {
         method: 'POST',
         headers: {
-          Authorization: 'Bearer ' + accessToken,
+          'Authorization': 'Bearer ' + accessToken,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          title: 'بوست تجريبي',
-          content: '<p>هذا أول بوست تجريبي منشور تلقائيًا 🎉</p>'
+          title: `🔹🪄🔹|| ${title} ــــ`,
+          content: htmlContent
         })
       })
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
-        document.body.innerHTML = '<h2>تم النشر بنجاح ✅</h2><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+        let resultHTML = `
+          <h2 style="color: green;">تم النشر بنجاح ✅</h2>
+          <p><strong>عنوان التدوينة:</strong> ${data.title}</p>
+          <p><strong>رابط التدوينة:</strong> <a href="${data.url}" target="_blank">${data.url}</a></p>
+          <button onclick="copyToClipboard('${data.url}')">نسخ الرابط</button>
+        `;
+        document.getElementById('result').innerHTML = resultHTML;
+        document.getElementById('result').style.display = 'block';
       })
-      .catch(err => {
-        document.body.innerHTML = '<h2>حصل خطأ ❌</h2><pre>' + err + '</pre>';
+      .catch(error => {
+        document.getElementById('result').innerHTML = `
+          <h2 style="color: red;">حدث خطأ ❌</h2>
+          <p>${error.message}</p>
+        `;
+        document.getElementById('result').style.display = 'block';
       });
-    } else {
-      document.body.innerHTML = '<h2>مفيش توكن وصل 👎</h2>';
+    }
+    
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text)
+        .then(() => alert('تم نسخ الرابط إلى الحافظة'))
+        .catch(err => alert('تعذر نسخ الرابط: ' + err));
     }
   </script>
 </body>
