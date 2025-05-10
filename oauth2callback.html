@@ -2,258 +2,86 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>أداة نشر الأفلام على بلوجر</title>
+  <title>نشر تدوينة بلوجر</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f8f9fa;
-      color: #333;
-      margin: 0;
+      font-family: Arial, sans-serif;
       padding: 20px;
-      line-height: 1.6;
+      background-color: #f5f5f5;
+      direction: rtl;
     }
-    
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    }
-    
-    h1 {
-      color: #4285f4;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    label {
+    input, textarea, button {
       display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: #555;
-    }
-    
-    input[type="text"] {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      margin-bottom: 15px;
+      padding: 10px;
       font-size: 16px;
-      box-sizing: border-box;
-      transition: border 0.3s;
     }
-    
-    input[type="text"]:focus {
-      border-color: #4285f4;
-      outline: none;
-    }
-    
     button {
-      background-color: #4285f4;
+      background-color: #2b7bff;
       color: white;
       border: none;
-      padding: 12px 25px;
-      font-size: 16px;
-      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s;
-      display: block;
-      width: 100%;
-      margin-top: 20px;
     }
-    
     button:hover {
-      background-color: #3367d6;
-    }
-    
-    #result {
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 6px;
-      display: none;
-    }
-    
-    .success {
-      background-color: #e6f4ea;
-      border: 1px solid #34a853;
-    }
-    
-    .error {
-      background-color: #fce8e6;
-      border: 1px solid #d93025;
-    }
-    
-    .copy-btn {
-      background-color: #34a853;
-      margin-top: 15px;
-    }
-    
-    .copy-btn:hover {
-      background-color: #2d9248;
-    }
-    
-    .view-btn {
-      background-color: #fbbc05;
-      margin-top: 10px;
-    }
-    
-    .view-btn:hover {
-      background-color: #e8ac04;
+      background-color: #1a5ed9;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>أداة نشر الأفلام على بلوجر</h1>
-    
-    <div id="authForm" style="display: none;">
-      <div class="form-group">
-        <label for="movieTitle">عنوان الفيلم/المسلسل:</label>
-        <input type="text" id="movieTitle" placeholder="مثال: فيلم The Match - 2025">
-      </div>
-      
-      <div class="form-group">
-        <label for="posterUrl">رابط صورة البوستر:</label>
-        <input type="text" id="posterUrl" placeholder="https://example.com/poster.jpg">
-      </div>
-      
-      <div class="form-group">
-        <label for="videoUrl">رابط الفيديو:</label>
-        <input type="text" id="videoUrl" placeholder="https://example.com/video.m3u8">
-      </div>
-      
-      <button onclick="createPost()">نشر الفيلم</button>
-    </div>
-    
-    <div id="result"></div>
-  </div>
+
+  <h2>📤 نشر تدوينة على بلوجر</h2>
+
+  <input type="text" id="title" placeholder="📝 عنوان التدوينة" required />
+  <input type="text" id="poster" placeholder="🖼️ رابط البوستر" required />
+  <input type="text" id="video" placeholder="🎥 رابط الفيديو (m3u8)" required />
+  <button id="publish">نشر التدوينة</button>
 
   <script>
-    // استخراج التوكن من الرابط
-    const hashParams = new URLSearchParams(window.location.hash.substr(1));
-    const accessToken = hashParams.get('access_token');
-    
-    if (accessToken) {
-      document.getElementById('authForm').style.display = 'block';
-    } else {
-      document.getElementById('result').innerHTML = `
-        <div class="error">
-          <h2 style="color: #d93025;">حدث خطأ في المصادقة</h2>
-          <p>يرجى المحاولة مرة أخرى أو التأكد من منح الصلاحيات اللازمة</p>
-        </div>
-      `;
-      document.getElementById('result').style.display = 'block';
-    }
-    
-    function createPost() {
-      const title = document.getElementById('movieTitle').value;
-      const poster = document.getElementById('posterUrl').value;
-      const video = document.getElementById('videoUrl').value;
-      
-      if (!title || !poster || !video) {
-        alert('الرجاء إدخال جميع الحقول المطلوبة');
-        return;
-      }
-      
-      // عرض رسالة تحميل
-      document.getElementById('result').innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-          <p>جاري إنشاء التدوينة ونشرها...</p>
-        </div>
-      `;
-      document.getElementById('result').style.display = 'block';
-      
-      // إنشاء محتوى HTML باستخدام القالب الخاص بك
-      const htmlContent = generateBloggerTemplate(title, poster, video);
-      
-      // إرسال طلب النشر إلى Blogger API
-      fetch('https://www.googleapis.com/blogger/v3/blogs/5055056580470574725/posts/', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + accessToken,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title: `🔹🪄🔹|| ${title} ــــ`,
-          content: htmlContent
-        })
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('حدث خطأ في الاتصال بالسيرفر');
-        }
-        return response.json();
-      })
-      .then(data => {
-        let resultHTML = `
-          <div class="success">
-            <h2 style="color: #34a853;">تم النشر بنجاح ✅</h2>
-            <p><strong>عنوان التدوينة:</strong> ${data.title}</p>
-            <p><strong>رابط التدوينة:</strong></p>
-            <input type="text" id="bloggerLink" value="${data.url}" readonly style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;">
-            <button class="copy-btn" onclick="copyToClipboard('${data.url}')">نسخ الرابط</button>
-            <button class="view-btn" onclick="window.open('${data.url}', '_blank')">فتح التدوينة</button>
-          </div>
-        `;
-        document.getElementById('result').innerHTML = resultHTML;
-      })
-      .catch(error => {
-        document.getElementById('result').innerHTML = `
-          <div class="error">
-            <h2 style="color: #d93025;">حدث خطأ ❌</h2>
-            <p>${error.message}</p>
-            <p>تفاصيل الخطأ: ${error}</p>
-          </div>
-        `;
+    const CLIENT_ID = '632431284451-224h8lmaql1disr9uk8kjcbv1l0moda7.apps.googleusercontent.com';
+    const REDIRECT_URI = 'https://zain-19994.github.io/blogger-tool/oauth2callback.html';
+    const BLOG_ID = '5055056580470574725';
+    let accessToken = null;
+
+    async function authenticate() {
+      return new Promise((resolve, reject) => {
+        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=https://www.googleapis.com/auth/blogger`;
+        const popup = window.open(authUrl, "_blank", "width=500,height=600");
+
+        const interval = setInterval(() => {
+          try {
+            const url = popup.location.href;
+            if (url.includes('#access_token=')) {
+              clearInterval(interval);
+              popup.close();
+              accessToken = url.split('#access_token=')[1].split('&')[0];
+              resolve();
+            }
+          } catch (err) {}
+        }, 1000);
       });
     }
-    
-    function generateBloggerTemplate(title, poster, video) {
+
+    function generateHTML(poster, video) {
       return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>${title}</title>
+  <title></title>
   <script src="https://cdn.jwplayer.com/libraries/IDzF9Zmk.js"></script>
   <style>
-    body {
-      margin: 0;
-      background-color: #000;
-    }
-    #vplayer {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      z-index: 2;
-    }
-    .poster {
-      position: absolute;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: 1;
-    }
+    body { margin: 0; background-color: #000; }
+    #vplayer { width: 100vw; height: 100vh; position: relative; z-index: 2; }
+    .poster { position: absolute; width: 100vw; height: 100vh; object-fit: cover; z-index: 1; }
     .video_ad, .video_ad_fadein {
-      display: none;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.8);
-      padding: 10px;
-      color: #000;
-      z-index: 999;
+      display: none; position: absolute; top: 10px; right: 10px;
+      background: rgba(255, 255, 255, 0.8); padding: 10px; color: #000; z-index: 999;
     }
   </style>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
+
   <img class="poster" src="${poster}" alt="بوستر الفيلم">
   <div id="vplayer"></div>
   <div class="video_ad">إعلان بعد انتهاء الفيديو</div>
@@ -261,75 +89,98 @@
   <div id="fviews" style="color: white; padding: 10px;"></div>
 
   <script type="text/javascript">
-    var playerSetupOptions = {
-      sources: [
-        {file:"${video}", label:"360p" },
-        {file:"", label:"333p" }
-      ],
-      image: "${poster}",
-      width: "100%", 
-      height: "100%",
-      stretching: "exactfit",
-      duration: "1814400",
-      live: true,
-      preload: 'auto',
-      androidhls: true,
-      hlshtml: true,
-      primary: "html5",
-      startparam: "start",
-      tracks: [],
-      sharing: {
-        code: "%3CIFRAME SRC%3D%22https%3A%2F%2Fv.aflam.news%2Fembed-ifdja1ecay6b.html%22 FRAMEBORDER%3D0 MARGINWIDTH%3D0 MARGINHEIGHT%3D0 SCROLLING%3DNO WIDTH%3D640 HEIGHT%3D360 allowfullscreen%3E%3C%2FIFRAME%3E",
-        link: "https://v.aflam.news/ifdja1ecay6b.html", 
-        sites: []
-      },
-      abouttext: "", 
-      aboutlink: "https://v.aflam.news",
-      cast: {},
-      playbackRateControls: true, 
-      playbackRates: [0.5, 1, 2, 3]
-    };
+  var playerSetupOptions = {
+    sources: [
+      { file: "${video}", label: "360p" },
+      { file: "", label: "333p" }
+    ],
+    image: "",
+    width: "100%", height: "100%",
+    stretching: "exactfit", duration: "1814400", live: true,
+    preload: 'auto', androidhls: true, hlshtml: true,
+    primary: "html5", startparam: "start", tracks: [],
+    sharing: {
+      code: "%3CIFRAME SRC%3D%22https%3A%2F%2Fv.aflam.news%2Fembed-ifdja1ecay6b.html%22 FRAMEBORDER%3D0 MARGINWIDTH%3D0 MARGINHEIGHT%3D0 SCROLLING%3DNO WIDTH%3D640 HEIGHT%3D360 allowfullscreen%3E%3C%2FIFRAME%3E",
+      link: "https://v.aflam.news/ifdja1ecay6b.html", sites: []
+    },
+    abouttext: "", aboutlink: "https://v.aflam.news",
+    cast: {}, playbackRateControls: true, playbackRates: [0.5, 1, 2, 3]
+  };
 
-    jwplayer("vplayer").setup(playerSetupOptions);
+  jwplayer("vplayer").setup(playerSetupOptions);
 
-    var vvplay, vvad, x2ok = 0;
-    var player = jwplayer();
+  var vvplay, vvad, x2ok = 0;
+  var player = jwplayer();
 
-    player.on('time', function(x) { 
-      if (x.position >= 5 && vvad != 1) {
-        vvad = 1;
-        $('div.video_ad_fadein').fadeIn('slow');
-      }
-      if (x2ok == 0 && x.position >= 2763 && x.position <= (2763 + 2)) {
-        x2ok = x.position;
-      }
-    });
-
-    player.on('play', function(x) { doPlay(x); });
-
-    player.on('complete', function() { 
-      $('div.video_ad').show();  
-    });
-
-    function doPlay(x) {
-      $('div.video_ad').hide();
-      if (vvplay) return;
-      vvplay = 1;
-      let adb = window.cRAds === undefined ? 1 : 0;
-      $.get('https://v.aflam.news/dl?op=view&file_code=ifdja1ecay6b&hash=916523-0-0-1745668226-46cfa084a7c2026262f701d37911d983&embed=&adb=' + adb, function(data) {
-        $('#fviews').html(data);
-      });
+  player.on('time', function(x) {
+    if (x.position >= 5 && vvad != 1) {
+      vvad = 1;
+      $('div.video_ad_fadein').fadeIn('slow');
     }
+    if (x2ok == 0 && x.position >= 2763 && x.position <= (2763 + 2)) {
+      x2ok = x.position;
+    }
+  });
+
+  player.on('play', function(x) { doPlay(x); });
+  player.on('complete', function() { $('div.video_ad').show(); });
+
+  function doPlay(x) {
+    $('div.video_ad').hide();
+    if (vvplay) return;
+    vvplay = 1;
+    let adb = window.cRAds === undefined ? 1 : 0;
+    $.get('https://v.aflam.news/dl?op=view&file_code=ifdja1ecay6b&hash=916523-0-0-1745668226-46cfa084a7c2026262f701d37911d983&embed=&adb=' + adb, function(data) {
+      $('#fviews').html(data);
+    });
+  }
   </script>
+
 </body>
 </html>`;
     }
-    
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text)
-        .then(() => alert('تم نسخ الرابط إلى الحافظة'))
-        .catch(err => alert('تعذر نسخ الرابط: ' + err));
-    }
+
+    document.getElementById("publish").addEventListener("click", async () => {
+      const title = document.getElementById("title").value.trim();
+      const poster = document.getElementById("poster").value.trim();
+      const video = document.getElementById("video").value.trim();
+
+      if (!title || !poster || !video) {
+        alert("من فضلك املأ كل الحقول");
+        return;
+      }
+
+      if (!accessToken) await authenticate();
+
+      const content = generateHTML(poster, video);
+
+      fetch(`https://www.googleapis.com/blogger/v3/blogs/${BLOG_ID}/posts/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          kind: "blogger#post",
+          title: title,
+          content: content
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.id) {
+          alert("✅ تم نشر التدوينة بنجاح!");
+          window.open(data.url, "_blank");
+        } else {
+          alert("❌ فشل النشر، راجع التفاصيل في Console");
+          console.error(data);
+        }
+      })
+      .catch(err => {
+        alert("❌ حصل خطأ أثناء النشر");
+        console.error(err);
+      });
+    });
   </script>
 </body>
 </html>
