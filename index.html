@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تسجيل الدخول بجوجل</title>
+</head>
+<body>
+  <h2>تسجيل الدخول لنشر بوست على بلوجر</h2>
+  <button onclick="login()">تسجيل الدخول بجوجل</button>
+
+  <script>
+    const clientId = '🔑 CLIENT_ID_HERE'; // ← حط هنا الـ Client ID بتاعك
+    const redirectUri = 'https://username.github.io/oauth2callback.html'; // ← عدّل حسب موقعك
+
+    function login() {
+      const scope = 'https://www.googleapis.com/auth/blogger';
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=token&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}`;
+      window.location.href = authUrl;
+    }
+  </script>
+</body>
+</html>
