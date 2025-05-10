@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>استلام التوكن</title>
+</head>
+<body>
+  <h2>جارٍ تسجيل الدخول...</h2>
+
+  <script>
+    // استخراج التوكن من الرابط
+    const hashParams = new URLSearchParams(window.location.hash.substr(1));
+    const accessToken = hashParams.get('access_token');
+
+    if (accessToken) {
+      // مثلًا نعمل بوست جديد
+      fetch('https://www.googleapis.com/blogger/v3/blogs/YOUR_BLOG_ID/posts/', {
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: 'بوست تجريبي',
+          content: '<p>هذا أول بوست تجريبي منشور تلقائيًا 🎉</p>'
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.body.innerHTML = '<h2>تم النشر بنجاح ✅</h2><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+      })
+      .catch(err => {
+        document.body.innerHTML = '<h2>حصل خطأ ❌</h2><pre>' + err + '</pre>';
+      });
+    } else {
+      document.body.innerHTML = '<h2>مفيش توكن وصل 👎</h2>';
+    }
+  </script>
+</body>
+</html>
